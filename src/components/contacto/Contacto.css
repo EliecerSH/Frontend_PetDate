@@ -1,0 +1,322 @@
+/* ── Hero collage ── */
+@keyframes subtle-zoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+
+.contacto-hero {
+  position: relative;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #b8ada0;
+}
+
+.contacto-hero__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.contacto-hero__bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.42;
+  filter: saturate(0.28) sepia(0.12);
+  animation: subtle-zoom 24s linear infinite alternate;
+  will-change: transform;
+}
+
+.contacto-hero__bg-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #e8e0d8;
+}
+
+.contacto-hero__vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(250,247,242,0.88) 0%, rgba(250,247,242,0.30) 55%, transparent 100%);
+}
+
+.contacto-hero__content {
+  position: relative; z-index: 10;
+  text-align: center; padding: 48px 24px;
+}
+
+.contacto-hero__title {
+  font-family: 'Aclonica', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  color: #3d2b1f;
+  margin: 0 0 12px;
+  line-height: 1.05;
+}
+
+.contacto-hero__slogan {
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  font-size: 1.05rem;
+  color: #6b4c38;
+  margin: 0;
+}
+
+/* ── Sección principal ── */
+.contacto-section {
+  background: #f5f3fb;
+  padding: 56px 5vw 72px;
+  min-height: calc(100vh - 260px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.contacto-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  width: 100%;
+  max-width: 1100px;
+}
+
+/* ── Cards ── */
+.contacto-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 36px 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.contacto-card__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 28px;
+  gap: 8px;
+}
+
+.contacto-card__icono {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ede8f5;
+  color: #7e6492;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.contacto-card__icono--green {
+  background: #e0f0e0;
+  color: #4a8a50;
+}
+
+.contacto-card__titulo {
+  font-family: 'Aclonica', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.contacto-card__desc {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+/* ── Campos del formulario ── */
+.contacto-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contacto-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.contacto-field__wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #e8e0f0;
+  border-radius: 12px;
+  padding: 0 14px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+
+.contacto-field__wrap:focus-within {
+  border-color: #7e6492;
+}
+
+.contacto-field__wrap--textarea {
+  align-items: flex-start;
+  padding-top: 12px;
+}
+
+.contacto-field__wrap--error {
+  border-color: #c0392b;
+}
+
+.contacto-field__ico {
+  color: #bbb;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.contacto-field__ico--top {
+  margin-top: 2px;
+}
+
+.contacto-field__input {
+  flex: 1;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.92rem;
+  color: #333;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 12px 0;
+}
+
+.contacto-field__input::placeholder { color: #bbb; }
+
+.contacto-field__textarea {
+  resize: none;
+  line-height: 1.6;
+  padding: 0 0 12px;
+}
+
+.contacto-field__error {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.78rem;
+  color: #c0392b;
+}
+
+.contacto-field__counter {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.78rem;
+  color: #bbb;
+  text-align: right;
+}
+
+/* ── Botón enviar ── */
+.contacto-form__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.contacto-btn {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 32px;
+  background: #7e6492;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.contacto-btn:hover { background: #6a5280; }
+.contacto-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* ── Success ── */
+.contacto-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.contacto-success__icon { color: #28a745; }
+
+.contacto-success__title {
+  font-family: 'Aclonica', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: #2d2d2d;
+  margin: 0;
+}
+
+.contacto-success__text {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+}
+
+/* ── Info de contacto ── */
+.contacto-info {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contacto-info__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1.5px solid #f0ecf5;
+  border-radius: 14px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.contacto-info__item:hover {
+  border-color: #d0c8e8;
+  background: #faf8fd;
+}
+
+.contacto-info__ico-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f2fa;
+  color: #7e6492;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contacto-info__link {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.contacto-info__link:hover { color: #7e6492; }
+
+/* ── Responsive ── */
+@media (max-width: 860px) {
+  .contacto-grid { grid-template-columns: 1fr; }
+  .contacto-section { padding: 40px 24px 56px; }
+}
+
+@media (max-width: 480px) {
+  .contacto-card { padding: 24px 18px; }
+}
