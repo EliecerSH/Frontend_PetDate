@@ -1,0 +1,63 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: petdate-ingress
+  namespace: petdate
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /usuarios
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /mascotas
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /servicios
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /promociones
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /blogs
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /comentarios
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /contacto
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /citas
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /uploads
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service: { name: api-gateway, port: { number: 8080 } }
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: frontend-service, port: { number: 80 } }
