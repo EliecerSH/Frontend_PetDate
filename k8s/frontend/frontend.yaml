@@ -1,0 +1,87 @@
+# =====================================================================
+# Capa Frontend Publica
+# Adaptado de Frontend_pd_test/k8s/back.yml (mismo patron de imagen ECR
+# parametrizada por IMAGE_TAG via pipeline), aplicado al frontend real
+# del Proyecto (React + Vite + Nginx).
+# =====================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: petdate
+  labels:
+    app: frontend
+    tier: app
+spec:
+  replicas: 2          # alta disponibilidad: >=2 replicas en distintos nodos/AZ
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        tier: app
+    spec:
+      nodeSelector:
+        tier: app
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - { key: app, operator: In, values: [frontend] }
+                topologyKey: kubernetes.io/hostname   # evita que ambas replicas caigan en el mismo nodo
+      containers:
+        - name: frontend
+          # La imagen se reemplaza dinamicamente en el pipeline (ver .github/workflows/deploy-frontend.yml)
+          image: ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/repo_petdate_frontend:${IMAGE_TAG}
+          ports:
+            - containerPort: 80
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "300m", memory: "256Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: petdate
+spec:
+  type: ClusterIP   # expuesto al exterior via el ALB Ingress (k8s/ingress/alb-ingress.yaml)
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-hpa
+  namespace: petdate
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60

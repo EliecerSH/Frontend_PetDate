@@ -5,7 +5,7 @@
   padding-top: 80px;
   padding-bottom: 72px;
   min-height: 100vh;
-  background: #fff;
+  background: #f5f0f0;
   font-family: 'Jost', sans-serif;
 }
 
@@ -299,6 +299,24 @@
 .bd-sidebar__btn:hover {
   background: #7e6492;
   color: #fff !important;
+}
+
+.bd-sidebar__rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bd-sidebar__rating-prom {
+  font-family: 'Jost', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3a3340;
+}
+.bd-sidebar__rating-conteo {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.83rem;
+  color: #888;
+  margin: 8px 0 0;
 }
 
 .bd-back-btn {
