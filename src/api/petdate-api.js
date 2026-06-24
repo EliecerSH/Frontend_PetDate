@@ -16,7 +16,8 @@
 // ─────────────────────────────────────────────
 // Configuración base
 // ─────────────────────────────────────────────
-export const BASE_URL = ''
+
+export const BASE_URL = 'http://localhost:8080'
 
 const TOKEN_KEY = 'petdate_token'
 

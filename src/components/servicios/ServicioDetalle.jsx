@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import AppNavbar from '../navbar/Navbar'
 import Footer from '../footer/Footer'
-import { TIPO_COLOR, TIPO_ICON } from './serviciosData'
+import { TIPO_COLOR, TIPO_ICON, estadoVencimientoPromo } from './serviciosData'
 import { Store, MapPin, Clock, Phone, MessageCircle, Globe, Camera, User, Tag, PawPrint, Hourglass, MessageSquare, SquarePen, ArrowLeft, Mail, Star } from 'lucide-react'
 import api, { BASE_URL } from '../../api/petdate-api'
 import Comentarios from '../comentarios/Comentarios'
@@ -14,6 +14,14 @@ function resolverColor(tipoServicio) {
 
 function resolverIcon(tipoServicio) {
   return TIPO_ICON[tipoServicio] || Store
+}
+
+// Texto del badge de la promoción según su estado de vencimiento
+const BADGE_VENC = {
+  normal:  'Activa',
+  pronto:  'Por vencer',
+  urgente: '¡Último día!',
+  vencida: 'Finalizada',
 }
 
 function obtenerUsuario() {
@@ -58,6 +66,7 @@ function ServicioDetalle() {
   const [notFound, setNotFound]       = useState(false)
   const [tab, setTab] = useState('promos') // 'promos' | 'comentarios'
   const [rating, setRating] = useState({ promedio: 0, total: 0 })
+  const [yaComento, setYaComento] = useState(false)
 
   const usuario = obtenerUsuario()
 
@@ -73,14 +82,16 @@ function ServicioDetalle() {
 
         try {
           const com = await api.comentarios.servicio.porServicio(id, { size: 200 })
-          const lista = com.content || []
-          const total = lista.length
+          const listaCom = com.content || []
+          const total = listaCom.length
           const promedio = total
-            ? lista.reduce((acc, c) => acc + (c.calificacion || 0), 0) / total
+            ? listaCom.reduce((acc, c) => acc + (c.calificacion || 0), 0) / total
             : 0
           setRating({ promedio, total })
+          setYaComento(!!usuario && listaCom.some((c) => c.idUsuario === usuario.id))
         } catch {
           setRating({ promedio: 0, total: 0 })
+          setYaComento(false)
         }
       } catch {
         setNotFound(true)
@@ -123,6 +134,10 @@ function ServicioDetalle() {
   // Solo la propia empresa ve el botón de editar
   const esDuenio = !!usuario && usuario.role === 'empresa' &&
     (usuario.servicioId === servicio.idServicio || usuario.id === servicio.idServicio)
+
+  // Una cuenta de cliente que aún no ha opinado: se le invita a comentar desde la pestaña
+  const esCliente = !!usuario && usuario.role === 'cliente'
+  const puedeOpinar = esCliente && !yaComento
 
   // Características destacadas (si existen)
   const caracteristicas = [
@@ -313,7 +328,23 @@ function ServicioDetalle() {
                 style={tab === 'comentarios' ? { color, borderColor: color } : {}}
                 onClick={() => setTab('comentarios')}
               >
-                <MessageSquare size={16} /> Comentarios y calificaciones
+                <MessageSquare size={16} />
+                <span>Comentarios</span>
+                {rating.total > 0 ? (
+                  <span className="detalle-tab-rating">
+                    <EstrellasPromedio valor={rating.promedio} size={13} />
+                    <span className="detalle-tab-rating__txt">
+                      {rating.promedio.toFixed(1)} ({rating.total})
+                    </span>
+                  </span>
+                ) : (
+                  <span className="detalle-tab-rating__txt">(0)</span>
+                )}
+                {puedeOpinar && (
+                  <span className="detalle-tab-cta" style={{ backgroundColor: color }}>
+                    ¡Opina!
+                  </span>
+                )}
               </button>
             </div>
 
@@ -326,18 +357,22 @@ function ServicioDetalle() {
                   </div>
                 ) : (
                   <div className="detalle-promos__lista">
-                    {promociones.map((promo) => (
+                    {promociones.map((promo) => {
+                      const venc = estadoVencimientoPromo(promo.fechaTermino);
+                      return (
                       <div key={promo.idPromocion} className="promo-detalle" style={{ borderLeftColor: color }}>
                         <h3 className="promo-detalle__titulo">{promo.titulo}</h3>
                         {promo.descripcion && <p className="promo-detalle__desc">{promo.descripcion}</p>}
-                        <span className="promo-detalle__estado" style={{ backgroundColor: `${color}1f`, color }}>
-                          Activa
+                        <span className={`promo-detalle__estado promo-detalle__estado--${venc.nivel}`}>
+                          {BADGE_VENC[venc.nivel]}
                         </span>
-                        <small className="promo-detalle__fecha">
+                        <small className={`promo-detalle__fecha promo-detalle__fecha--${venc.nivel}`}>
                           Válido hasta {promo.fechaTermino}
+                          {venc.texto && <span className="promo-detalle__venc"> · {venc.texto}</span>}
                         </small>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )
               )}

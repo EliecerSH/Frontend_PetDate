@@ -302,8 +302,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 18px 12px;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 16px 12px;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -318,6 +319,33 @@
 
 .detalle-tab-btn--activo {
   color: #7e6492;
+}
+
+/* Resumen de calificación dentro de la pestaña de comentarios */
+.detalle-tab-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.detalle-tab-rating__txt {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #999;
+}
+
+/* Distintivo "¡Opina!" para invitar a comentar a quien aún no lo ha hecho */
+.detalle-tab-cta {
+  font-family: 'Jost', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03rem;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
 }
 
 /* Cuerpo con scroll propio */
@@ -384,12 +412,26 @@
   margin-top: 4px;
 }
 
+/* Color del badge según el estado de vencimiento */
+.promo-detalle__estado--normal  { background: #e3f5ea; color: #2e9e5b; }  /* Activa: verde */
+.promo-detalle__estado--pronto  { background: #fbeed6; color: #d98a1f; }  /* Por vencer: ámbar */
+.promo-detalle__estado--urgente { background: #fde2e4; color: #dc3545; }  /* Último día: rojo */
+.promo-detalle__estado--vencida { background: #ececec; color: #888; }     /* Finalizada: gris */
+
 .promo-detalle__fecha {
   font-family: 'Jost', sans-serif;
   font-size: 0.78rem;
   color: #999;
   margin-top: 2px;
 }
+
+/* Estado de vencimiento (sutil, solo en la fecha) */
+.promo-detalle__venc { font-weight: 600; }
+.promo-detalle__fecha--normal  { color: #2e9e5b; }   /* activa: verde */
+.promo-detalle__fecha--pronto  { color: #d98a1f; }   /* por vencer: ámbar */
+.promo-detalle__fecha--urgente { color: #dc3545; }   /* hoy/mañana: rojo */
+.promo-detalle__fecha--vencida { color: #999; }      /* vencida: gris */
+.promo-detalle__fecha--vencida .promo-detalle__venc { font-style: italic; }
 
 /* Comentarios dentro del tab */
 .detalle-comentarios .cm-wrap {

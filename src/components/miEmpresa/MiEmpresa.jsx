@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Modal, Button, Form } from 'react-bootstrap';
 import Navbar from '../navbar/Navbar';
 import Footer from '../footer/Footer';
-import { TIPO_COLOR, COMUNAS } from '../servicios/serviciosData';
+import { TIPO_COLOR, COMUNAS, estadoVencimientoPromo } from '../servicios/serviciosData';
 import { Building2, ClipboardList, CheckCircle2, Tag, Pencil, Trash2, Image as ImageIcon, Newspaper, MapPin, Phone, MessageCircle, Globe, Clock, Eye, BookOpen, X } from 'lucide-react';
 import ConfirmModal from '../confirm/ConfirmModal';
 
@@ -36,6 +36,21 @@ const RUBROS_EMPRESA = [
 ];
 
 const HORARIOS_PRESET = ['Lunes a Viernes', 'Lunes a Sábado', 'Todos los días', 'Lunes a Domingo 24/7'];
+
+// Separa un horario guardado ("Lunes a Sábado · 09:00–18:30") en día + horas.
+function separarHorario(horario) {
+  const raw = (horario || '').trim();
+  const partes = raw.split('·');
+  if (partes.length === 2) {
+    const dia = partes[0].trim();
+    const horas = partes[1].trim().split('–');
+    if (horas.length === 2) {
+      return { dia, desde: horas[0].trim(), hasta: horas[1].trim() };
+    }
+    return { dia, desde: '', hasta: '' };
+  }
+  return { dia: raw, desde: '', hasta: '' };
+}
 const TIPOS_IMAGEN_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
 const TAMANO_MAX_MB = 5;
 
@@ -54,6 +69,7 @@ function MiEmpresa() {
   });
   const [guardado, setGuardado]   = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [errWsp, setErrWsp]       = useState('');
 
   const [imagenUrl, setImagenUrl]           = useState('');
   const [imagenPreview, setImagenPreview]   = useState(null);
@@ -91,15 +107,16 @@ function MiEmpresa() {
           api.promociones.porServicio(user.servicioId, { size: 100 }),
           api.blogs.porServicio(user.servicioId, { size: 100, sort: 'fecha,desc' }),
         ]);
+        const { dia: horarioDia, desde: horaDesde, hasta: horaHasta } = separarHorario(svc.horario);
         setFormServicio({
           nombre:      svc.nombreServicio || '',
           tipo:        svc.tipoServicio   || '',
           descripcion: svc.descripcion    || '',
           direccion:   svc.direccion      || '',
           comuna:      svc.comuna         || '',
-          horario:     svc.horario        || '',
-          horaDesde:   '',
-          horaHasta:   '',
+          horario:     horarioDia,
+          horaDesde,
+          horaHasta,
           telefono:    svc.telefono       || '',
           wsp:         svc.whatsApp       || '',
           web:         svc.sitioWeb       || '',
@@ -121,14 +138,22 @@ function MiEmpresa() {
   const campo = (f, v) => setFormServicio(p => ({ ...p, [f]: v }));
 
   const guardarServicio = async () => {
+    if (formServicio.wsp && !/^\d+$/.test(formServicio.wsp)) {
+      setErrWsp('El WhatsApp solo admite números (sin +, espacios ni guiones). Ej: 56912345678');
+      return;
+    }
+    setErrWsp('');
     setGuardando(true);
     try {
       const u = JSON.parse(localStorage.getItem('user'));
+      const horarioCompleto = (formServicio.horaDesde && formServicio.horaHasta)
+        ? `${formServicio.horario} · ${formServicio.horaDesde}–${formServicio.horaHasta}`
+        : formServicio.horario;
       await api.servicios.actualizar(u.servicioId, {
         nombreServicio: formServicio.nombre, tipoServicio: formServicio.tipo,
         rutEmpresa: u.rut || '', correo: u.email || '', contrasena: u.contrasena || '',
         descripcion: formServicio.descripcion, direccion: formServicio.direccion,
-        comuna: formServicio.comuna, horario: formServicio.horario,
+        comuna: formServicio.comuna, horario: horarioCompleto,
         telefono: formServicio.telefono, whatsApp: formServicio.wsp,
         sitioWeb: formServicio.web, instagram: formServicio.instagram, facebook: formServicio.facebook,
       });
@@ -325,6 +350,22 @@ function MiEmpresa() {
                 </li>
               )}
             </ul>
+
+            {/* ── Vista previa del perfil público ── */}
+            <section className="me-seccion me-seccion--preview me-sidebar__preview">
+              <div className="me-seccion__cabecera" style={{ marginBottom: 0 }}>
+                <div className="me-seccion__cabecera-izq">
+                  <div className="me-seccion__icono" style={{ background: colorBg, color }}><Eye size={18} /></div>
+                  <div>
+                    <h2 className="me-seccion__titulo">Vista previa de tu perfil público</h2>
+                    <p className="me-seccion__desc">Así te ven los usuarios de PetDate.</p>
+                  </div>
+                </div>
+                <button className="me-btn-outline" style={{ borderColor: color, color }} onClick={() => navigate(`/servicios/${user.servicioId}`)}>
+                  <Eye size={14} /> Ver mi perfil público
+                </button>
+              </div>
+            </section>
           </aside>
 
           {/* ════ COLUMNA PRINCIPAL ════ */}
@@ -397,7 +438,13 @@ function MiEmpresa() {
                   </div>
                   <div className="me-campo">
                     <label className="me-campo__label">WhatsApp (solo números)</label>
-                    <input className="me-campo__input" value={formServicio.wsp} onChange={e => campo('wsp', e.target.value)} />
+                    <input
+                      className={`me-campo__input${errWsp ? ' me-campo__input--error' : ''}`}
+                      value={formServicio.wsp}
+                      onChange={e => { campo('wsp', e.target.value); if (errWsp) setErrWsp(''); }}
+                      placeholder="56912345678"
+                    />
+                    {errWsp && <span className="me-campo__error">{errWsp}</span>}
                   </div>
                   <div className="me-campo">
                     <label className="me-campo__label">Instagram (sin @)</label>
@@ -453,19 +500,25 @@ function MiEmpresa() {
                 </div>
               ) : (
                 <div className="me-lista">
-                  {promociones.map(p => (
+                  {promociones.map(p => {
+                    const venc = estadoVencimientoPromo(p.fechaTermino);
+                    return (
                     <div className="me-item" key={p.idPromocion} style={{ borderLeftColor: color }}>
                       <div className="me-item__info">
                         <h3 className="me-item__titulo">{p.titulo}</h3>
                         {p.descripcion && <p className="me-item__desc">{p.descripcion}</p>}
-                        <small className="me-item__fecha">{p.fechaInicio} → {p.fechaTermino}</small>
+                        <small className={`me-item__fecha me-item__fecha--${venc.nivel}`}>
+                          {p.fechaInicio} → {p.fechaTermino}
+                          {venc.texto && <span className="me-item__venc"> · {venc.texto}</span>}
+                        </small>
                       </div>
                       <div className="me-item__acciones">
                         <button className="me-item__editar" onClick={() => abrirEditarPromo(p)}><Pencil size={13} /> Editar</button>
                         <button className="me-item__eliminar" onClick={() => eliminarPromo(p.idPromocion)}><Trash2 size={13} /> Eliminar</button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -512,22 +565,6 @@ function MiEmpresa() {
                   ))}
                 </div>
               )}
-            </section>
-
-            {/* ── Sección: Vista previa ── */}
-            <section className="me-seccion me-seccion--preview">
-              <div className="me-seccion__cabecera" style={{ marginBottom: 0 }}>
-                <div className="me-seccion__cabecera-izq">
-                  <div className="me-seccion__icono" style={{ background: colorBg, color }}><Eye size={18} /></div>
-                  <div>
-                    <h2 className="me-seccion__titulo">Vista previa de tu perfil público</h2>
-                    <p className="me-seccion__desc">Así es como los usuarios verán tu información en PetDate.</p>
-                  </div>
-                </div>
-                <button className="me-btn-outline" style={{ borderColor: color, color }} onClick={() => navigate(`/servicios/${user.servicioId}`)}>
-                  <Eye size={14} /> Ver mi perfil público
-                </button>
-              </div>
             </section>
 
           </main>
