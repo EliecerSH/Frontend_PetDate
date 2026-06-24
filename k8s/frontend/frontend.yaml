@@ -50,6 +50,8 @@ kind: Service
 metadata:
   name: frontend-service
   namespace: petdate
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "alb"
 spec:
   type: LoadBalancer
   selector:
