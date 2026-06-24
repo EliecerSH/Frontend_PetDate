@@ -17,7 +17,7 @@
 // Configuración base
 // ─────────────────────────────────────────────
 
-export const BASE_URL = 'http://localhost:8080'
+export const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
 const TOKEN_KEY = 'petdate_token'
 
